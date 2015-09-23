@@ -15,8 +15,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Intent cameraServiceIntent;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,10 +26,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Intent cameraServiceIntent = new Intent(MainActivity.this, CameraService.class);
                 if (isServiceRunning(CameraService.class)) {
                     stopService(cameraServiceIntent);
                 } else {
-                    cameraServiceIntent = new Intent(MainActivity.this, CameraService.class);
                     startService(cameraServiceIntent);
                 }
             }
