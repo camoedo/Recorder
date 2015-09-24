@@ -1,12 +1,16 @@
 package com.camoedo.recorder;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,6 +18,27 @@ import android.view.View;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+
+    private CameraService mService;
+    private boolean mBound = false;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to CameraService, cast the IBinder and get CameraService instance
+            CameraService.ServiceBinder binder = (CameraService.ServiceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,14 +51,42 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent cameraServiceIntent = new Intent(MainActivity.this, CameraService.class);
+                Intent intent = new Intent(MainActivity.this, CameraService.class);
                 if (isServiceRunning(CameraService.class)) {
-                    stopService(cameraServiceIntent);
+                    if (mBound) {
+                        unbindService(mConnection);
+                        mBound = false;
+                    }
+                    stopService(intent);
                 } else {
-                    startService(cameraServiceIntent);
+                    bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+                    startService(intent);
                 }
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (isServiceRunning(CameraService.class)) {
+            // Bind to CameraService
+            Intent intent = new Intent(this, CameraService.class);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            Log.i(TAG, "Service bound");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unbind from the service
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+            Log.i(TAG, "Service unbound");
+        }
     }
 
     @Override
