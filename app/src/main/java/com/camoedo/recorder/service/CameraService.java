@@ -1,46 +1,42 @@
-package com.camoedo.recorder;
+package com.camoedo.recorder.service;
+
+import com.camoedo.recorder.MainActivity;
+import com.camoedo.recorder.R;
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
-import android.os.Binder;
-import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
-import android.widget.Toast;
 
-public class CameraService extends Service {
+public class CameraService extends AbstractService {
 
     private static final String TAG = "CameraService";
     private static final int NOTIFICATION_ID = 1;
 
-    private final IBinder mBinder = new ServiceBinder();
-
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Toast.makeText(this, "Service created", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
+    public void onStartService() {
         startForeground(NOTIFICATION_ID, getNotification());
-        return START_STICKY;
+        Log.i(TAG, "Service Started.");
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onStopService() {
         stopForeground(true);
-        Log.i(TAG, "Service destroyed");
+        Log.i(TAG, "Service Stopped.");
+    }
+
+    @Override
+    public void onReceiveMessage(Message msg) {
+
     }
 
     private Notification getNotification() {
         Notification.Builder builder = new Notification.Builder(this)
                 .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle("My notification")
-                .setContentText("Hello World!")
+                .setContentTitle("Recorder")
+                .setContentText("14 package were sent")
                 .setTicker("Recording...");
 
         // Creates an explicit intent for an Activity in your app
@@ -61,21 +57,5 @@ public class CameraService extends Service {
         builder.setContentIntent(pendingIntent);
         builder.setOngoing(true);
         return builder.build();
-    }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
-
-    /**
-     * Class used for the client Binder. Because we know this service always
-     * runs in the same process as its clients, we don't need to deal with IPC.
-     */
-    public class ServiceBinder extends Binder {
-        CameraService getService() {
-            // Return this instance of CameraService so clients can call public methods
-            return CameraService.this;
-        }
     }
 }
