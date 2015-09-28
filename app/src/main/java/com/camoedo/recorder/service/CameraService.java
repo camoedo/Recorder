@@ -7,8 +7,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.os.Environment;
@@ -17,7 +15,6 @@ import android.os.Message;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.ImageView;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -33,26 +30,29 @@ public class CameraService extends AbstractService implements SurfaceHolder.Call
     private static final String TAG = "CameraService";
     private static final int NOTIFICATION_ID = 1;
 
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    public static final int MEDIA_TYPE_VIDEO = 2;
+
     private int mCameraId;
     private Camera mCamera;
 
     Camera.PictureCallback cameraPictureCallback = new Camera.PictureCallback() {
 
         public void onPictureTaken(byte[] data, Camera camera) {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+            if (pictureFile == null){
+                Log.d(TAG, "Error creating media file, check storage permissions");
+                return;
+            }
 
-            if (bitmap != null) {
-                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmddhhmmss");
-                String date = dateFormat.format(new Date());
-                String path = Environment.getExternalStorageDirectory() + File.separator + date + ".jpg";
-                FileOutputStream fileOutputStream;
-                try {
-                    fileOutputStream = new FileOutputStream(path);
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fileOutputStream);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-
+            try {
+                FileOutputStream fos = new FileOutputStream(pictureFile);
+                fos.write(data);
+                fos.close();
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d(TAG, "Error accessing file: " + e.getMessage());
             }
         }
     };
@@ -81,6 +81,7 @@ public class CameraService extends AbstractService implements SurfaceHolder.Call
             Camera.Parameters params = mCamera.getParameters();
             params.setSceneMode(Camera.Parameters.SCENE_MODE_PARTY);
             params.setPictureFormat(ImageFormat.JPEG);
+            params.setColorEffect(Camera.Parameters.EFFECT_MONO);
             params.setJpegQuality(100);
             mCamera.setParameters(params);
 
@@ -179,5 +180,39 @@ public class CameraService extends AbstractService implements SurfaceHolder.Call
             }
         }
         return cameraId;
+    }
+
+    /** Create a File for saving an image or video */
+    private static File getOutputMediaFile(int type){
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "CameraService");
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                Log.d(TAG, "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE){
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+        } else if(type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "VID_"+ timeStamp + ".mp4");
+        } else {
+            return null;
+        }
+
+        return mediaFile;
     }
 }
