@@ -1,6 +1,6 @@
 package com.camoedo.recorder;
 
-import com.camoedo.recorder.service.CameraService;
+import com.camoedo.recorder.service.RecorderService;
 import com.camoedo.recorder.service.ServiceManager;
 
 import android.os.Bundle;
@@ -32,14 +32,14 @@ public class MainActivity extends AppCompatActivity {
 
         textStatus = (TextView)findViewById(R.id.status);
 
-        mService = new ServiceManager(this, CameraService.class, new Handler() {
+        mService = new ServiceManager(this, RecorderService.class, new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
-                    case CameraService.MSG_REGISTERED:
+                    case RecorderService.MSG_REGISTERED:
                         textStatus.setText("Activity registered!");
                         break;
-                    case CameraService.MSG_UNREGISTERED:
+                    case RecorderService.MSG_UNREGISTERED:
                         textStatus.setText("Activity un-registered!");
                         break;
                     default:

@@ -106,7 +106,7 @@ public class Camera implements android.hardware.Camera.PictureCallback {
 
         // TODO: Change to Environment.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "CameraService");
+                Environment.DIRECTORY_PICTURES), "RecorderService");
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 

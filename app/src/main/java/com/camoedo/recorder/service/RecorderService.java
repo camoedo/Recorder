@@ -15,9 +15,9 @@ import com.camoedo.recorder.R;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class CameraService extends AbstractService {
+public class RecorderService extends AbstractService {
 
-    private static final String TAG = "CameraService";
+    private static final String TAG = "RecorderService";
     private static final int NOTIFICATION_ID = 1;
 
     private final Handler mHandler = new Handler();
