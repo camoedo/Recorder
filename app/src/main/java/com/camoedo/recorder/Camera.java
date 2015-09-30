@@ -84,6 +84,10 @@ public class Camera implements android.hardware.Camera.PictureCallback {
         }
     }
 
+    public CameraView getCameraView() {
+        return mCameraView;
+    }
+
     private int findFrontFacingCamera() {
         int cameraId = -1;
         // Search for the front facing camera

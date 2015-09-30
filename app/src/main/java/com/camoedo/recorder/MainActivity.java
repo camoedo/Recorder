@@ -13,34 +13,34 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.FrameLayout;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private TextView textStatus;
-
+    private Camera mCamera;
     private ServiceManager mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        textStatus = (TextView)findViewById(R.id.status);
+        mCamera = new Camera(this);
+
+        ((FrameLayout) findViewById(R.id.preview)).addView(mCamera.getCameraView());
 
         mService = new ServiceManager(this, RecorderService.class, new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 switch (msg.what) {
                     case RecorderService.MSG_REGISTERED:
-                        textStatus.setText("Activity registered!");
                         break;
                     case RecorderService.MSG_UNREGISTERED:
-                        textStatus.setText("Activity un-registered!");
                         break;
                     default:
                         super.handleMessage(msg);

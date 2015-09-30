@@ -9,12 +9,13 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import java.io.IOException;
 import java.util.List;
 
-public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
+public class CameraView extends ViewGroup implements SurfaceHolder.Callback {
 
     private static final String TAG = "CameraView";
 
@@ -27,14 +28,14 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     // Parent Context.
     private Context mContext;
 
+    private SurfaceView mSurfaceView;
+
     // Camera Sizing (For rotation, orientation changes)
     private Camera.Size mPreviewSize;
 
     // List of supported preview sizes
     private List<Camera.Size> mSupportedPreviewSizes;
 
-    // View holding this camera.
-    private View mCameraView;
 
     public CameraView(Context context, Camera camera) {
         super(context);
@@ -46,7 +47,9 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
 
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
-        mHolder = getHolder();
+        mSurfaceView = new SurfaceView(context);
+        addView(mSurfaceView, 0);
+        mHolder = mSurfaceView.getHolder();
         mHolder.addCallback(this);
         // deprecated setting, but required on Android versions prior to 3.0
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -116,6 +119,7 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         // Source: http://stackoverflow.com/questions/7942378/android-camera-will-not-work-startpreview-fails
         if (changed) {
+
             final int width = right - left;
             final int height = bottom - top;
 
@@ -147,8 +151,8 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback {
                 }
             }
 
-            final int scaledChildHeight = previewHeight * width / previewWidth;
-            mCameraView.layout(0, height - scaledChildHeight, width, height);
+            // final int scaledChildHeight = previewHeight * width / previewWidth;
+            getChildAt(0).layout(0, 0/*height - scaledChildHeight*/, width, height);
         }
     }
 
