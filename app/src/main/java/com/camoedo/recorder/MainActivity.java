@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         if (mCamera != null) {
+            mCamera.release();
             mCamera = null;
         }
 
