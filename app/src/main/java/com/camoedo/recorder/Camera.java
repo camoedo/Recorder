@@ -1,7 +1,6 @@
 package com.camoedo.recorder;
 
 import android.content.Context;
-import android.graphics.ImageFormat;
 import android.os.Environment;
 import android.util.Log;
 
@@ -13,8 +12,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
-
+@SuppressWarnings("deprecation")
 public class Camera implements android.hardware.Camera.PictureCallback {
 
     private static final String TAG = "Camera";
@@ -34,17 +34,7 @@ public class Camera implements android.hardware.Camera.PictureCallback {
 
         try {
             mCameraId = findFrontFacingCamera();
-            mCamera = android.hardware.Camera.open(mCameraId);
-            android.hardware.Camera.Parameters params = mCamera.getParameters();
-            params.setSceneMode(android.hardware.Camera.Parameters.SCENE_MODE_PARTY);
-            params.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
-            params.setFlashMode(android.hardware.Camera.Parameters.FLASH_MODE_AUTO);
-            params.setPictureFormat(ImageFormat.JPEG);
-            params.setJpegQuality(100);
-            mCamera.setParameters(params);
-
-            mCameraView = new CameraView(mContext, mCamera);
-
+            initCamera();
         } catch (Exception e) {
             Log.d(TAG, "Cannot instantiate camera");
         }
@@ -84,6 +74,15 @@ public class Camera implements android.hardware.Camera.PictureCallback {
         }
     }
 
+    public void switchCamera() {
+        if (mCameraId == android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK){
+            mCameraId = android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT;
+        } else {
+            mCameraId = android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK;
+        }
+        initCamera();
+    }
+
     public CameraView getCameraView() {
         return mCameraView;
     }
@@ -95,13 +94,27 @@ public class Camera implements android.hardware.Camera.PictureCallback {
         for (int i = 0; i < numberOfCameras; i++) {
             android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
             android.hardware.Camera.getCameraInfo(i, info);
-            if (info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK) {
+            if (info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 Log.v(TAG, "Camera found");
                 cameraId = i;
                 break;
             }
         }
         return cameraId;
+    }
+
+    private void initCamera() {
+        release();
+        mCamera = android.hardware.Camera.open(mCameraId);
+//            android.hardware.Camera.Parameters params = mCamera.getParameters();
+//            params.setSceneMode(android.hardware.Camera.Parameters.SCENE_MODE_PARTY);
+//            params.setColorEffect(android.hardware.Camera.Parameters.EFFECT_MONO);
+//            params.setFlashMode(android.hardware.Camera.Parameters.FLASH_MODE_AUTO);
+//            params.setPictureFormat(ImageFormat.JPEG);
+//            params.setJpegQuality(100);
+//            mCamera.setParameters(params);
+
+        mCameraView = new CameraView(mContext, mCamera);
     }
 
     private static File getOutputMediaFile(int type){
@@ -123,7 +136,7 @@ public class Camera implements android.hardware.Camera.PictureCallback {
         }
 
         // Create a media file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(new Date());
         File mediaFile;
         if (type == MEDIA_TYPE_IMAGE){
             mediaFile = new File(mediaStorageDir.getPath() + File.separator +

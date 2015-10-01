@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    private FrameLayout mPreview;
     private Camera mCamera;
     private ServiceManager mService;
 
@@ -32,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
 
         mCamera = new Camera(this);
 
-        ((FrameLayout) findViewById(R.id.preview)).addView(mCamera.getCameraView());
+        mPreview = (FrameLayout) findViewById(R.id.preview);
+        mPreview.addView(mCamera.getCameraView());
 
         mService = new ServiceManager(this, RecorderService.class, new Handler() {
             @Override
@@ -52,11 +54,14 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mService.isRunning()) {
-                    mService.stop();
-                } else {
-                    mService.start();
-                }
+                mPreview.removeView(mCamera.getCameraView());
+                mCamera.switchCamera();
+                mPreview.addView(mCamera.getCameraView());
+//                if (mService.isRunning()) {
+//                    mService.stop();
+//                } else {
+//                    mService.start();
+//                }
             }
         });
     }
