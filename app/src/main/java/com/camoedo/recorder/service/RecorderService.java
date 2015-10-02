@@ -36,7 +36,7 @@ public class RecorderService extends AbstractService {
             public void run() {
                 mHandler.post(new Runnable() {
                     public void run() {
-                        mCamera.takePicture();
+                        // mCamera.takePicture();
                     }
                 });
             }

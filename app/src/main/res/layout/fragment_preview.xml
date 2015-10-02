@@ -1,0 +1,53 @@
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context="com.camoedo.recorder.fragment.PreviewFragment">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <FrameLayout
+            android:id="@+id/preview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+
+        <LinearLayout
+            android:id="@+id/info"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="#7000"
+            android:orientation="vertical"
+            android:padding="30dp"
+            android:paddingBottom="30dp"
+            android:paddingTop="30dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:shadowColor="#000"
+                android:shadowDx="3"
+                android:shadowDy="3"
+                android:shadowRadius="6"
+                android:text="Smile we are watching you..."
+                android:textColor="#FFF"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_dialog_email"
+        app:layout_anchor="@+id/info"
+        app:layout_anchorGravity="top|right|end"/>
+
+</android.support.design.widget.CoordinatorLayout>

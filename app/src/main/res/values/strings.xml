@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">Recorder</string>
     <string name="action_settings">Settings</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="recorder_fragment">Recording...</string>
+
 </resources>

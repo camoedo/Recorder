@@ -1,26 +1,25 @@
 package com.camoedo.recorder;
 
-import com.camoedo.recorder.service.RecorderService;
-import com.camoedo.recorder.service.ServiceManager;
-
+import android.app.Fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.FrameLayout;
 
-public class MainActivity extends AppCompatActivity {
+import com.camoedo.recorder.fragment.PreviewFragment;
+import com.camoedo.recorder.fragment.RecorderFragment;
+import com.camoedo.recorder.service.RecorderService;
+import com.camoedo.recorder.service.ServiceManager;
+
+public class MainActivity extends AppCompatActivity
+        implements PreviewFragment.OnFragmentInteractionListener {
 
     private static final String TAG = "MainActivity";
 
-    private FrameLayout mPreview;
-    private Camera mCamera;
     private ServiceManager mService;
 
     @Override
@@ -30,11 +29,6 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        mCamera = new Camera(this);
-
-        mPreview = (FrameLayout) findViewById(R.id.preview);
-        mPreview.addView(mCamera.getCameraView());
 
         mService = new ServiceManager(this, RecorderService.class, new Handler() {
             @Override
@@ -49,46 +43,35 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mPreview.removeView(mCamera.getCameraView());
-                mCamera.switchCamera();
-                mPreview.addView(mCamera.getCameraView());
-//                if (mService.isRunning()) {
-//                    mService.stop();
-//                } else {
-//                    mService.start();
-//                }
-            }
-        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
+        Fragment fragment;
         if (mService.isRunning()) {
             mService.bind();
             Log.i(TAG, "Service bound");
+            fragment = new RecorderFragment();
+        } else {
+            fragment = new PreviewFragment();
         }
+        getFragmentManager().beginTransaction()
+                .replace(R.id.content, fragment)
+                .commit();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mCamera != null) {
-            mCamera.release();
-            mCamera = null;
-        }
-
-        try {
-            mService.unbind();
-        } catch (Throwable t) {
-            Log.e(TAG, "Failed to unbind from the service", t);
+        if (mService != null) {
+            try {
+                mService.unbind();
+            } catch (Throwable t) {
+                Log.e(TAG, "Failed to unbind from the service", t);
+            }
         }
     }
 
@@ -112,5 +95,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onClick() {
+        if (!mService.isRunning()) {
+            mService.stop();
+        } else {
+            mService.start();
+        }
     }
 }
