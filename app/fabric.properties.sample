@@ -1,0 +1,7 @@
+#Contains API Secret used to validate your application. Commit to internal source control; avoid making secret public.
+apiSecret=EDIT_THIS
+twitterPluginId=EDIT_THIS
+
+#These keys are provisioned on the plugin. Copy the keys on the plugin here.
+twitterConsumerKey=EDIT_THIS
+twitterConsumerSecret=EDIT_THIS
