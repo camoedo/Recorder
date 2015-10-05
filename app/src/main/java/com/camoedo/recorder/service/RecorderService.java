@@ -9,7 +9,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.camoedo.recorder.Camera;
-import com.camoedo.recorder.MainActivity;
+import com.camoedo.recorder.activity.MainActivity;
 import com.camoedo.recorder.R;
 
 import java.util.Timer;

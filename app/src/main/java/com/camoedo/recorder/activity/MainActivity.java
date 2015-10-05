@@ -1,5 +1,7 @@
-package com.camoedo.recorder;
+package com.camoedo.recorder.activity;
 
+import com.camoedo.recorder.Camera;
+import com.camoedo.recorder.R;
 import com.camoedo.recorder.service.RecorderService;
 import com.camoedo.recorder.service.ServiceManager;
 
