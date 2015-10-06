@@ -4,6 +4,7 @@ import com.camoedo.recorder.Camera;
 import com.camoedo.recorder.R;
 import com.camoedo.recorder.service.RecorderService;
 import com.camoedo.recorder.service.ServiceManager;
+import com.digits.sdk.android.Digits;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -109,7 +110,11 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_logout) {
+            // Clear session on logout
+            Digits.getSessionManager().clearActiveSession();
+            finish();
+        } else if (id == R.id.action_settings) {
             return true;
         }
 
