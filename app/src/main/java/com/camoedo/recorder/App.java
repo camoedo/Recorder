@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.crashlytics.android.Crashlytics;
 import com.digits.sdk.android.Digits;
+import com.digits.sdk.android.DigitsSession;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterCore;
 
@@ -25,5 +26,21 @@ public class App extends Application {
 
     public static App getInstance() {
         return singleton;
+    }
+
+    public static DigitsSession getSession() {
+        return Digits.getSessionManager().getActiveSession();
+    }
+
+    public static void clearSession() {
+        Digits.getSessionManager().clearActiveSession();
+    }
+
+    public static boolean isLoggedIn() {
+        return getSession() != null;
+    }
+
+    public static void logException(Throwable throwable) {
+        Crashlytics.logException(throwable);
     }
 }

@@ -1,11 +1,6 @@
 package com.camoedo.recorder.activity;
 
-import com.camoedo.recorder.Camera;
-import com.camoedo.recorder.R;
-import com.camoedo.recorder.service.RecorderService;
-import com.camoedo.recorder.service.ServiceManager;
-import com.digits.sdk.android.Digits;
-
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -17,6 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+
+import com.camoedo.recorder.App;
+import com.camoedo.recorder.Camera;
+import com.camoedo.recorder.R;
+import com.camoedo.recorder.service.RecorderService;
+import com.camoedo.recorder.service.ServiceManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +31,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (!App.isLoggedIn()) {
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            finish();
+        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -112,7 +118,7 @@ public class MainActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_logout) {
             // Clear session on logout
-            Digits.getSessionManager().clearActiveSession();
+            App.clearSession();
             finish();
         } else if (id == R.id.action_settings) {
             return true;
