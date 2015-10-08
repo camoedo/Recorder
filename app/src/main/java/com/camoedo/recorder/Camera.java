@@ -3,6 +3,7 @@ package com.camoedo.recorder;
 import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
+import android.widget.FrameLayout;
 
 import com.camoedo.recorder.view.CameraView;
 
@@ -28,6 +29,7 @@ public class Camera implements android.hardware.Camera.PictureCallback {
     private android.hardware.Camera mCamera;
 
     private CameraView mCameraView;
+    private FrameLayout mPreviewHolder;
 
     public Camera(Context context) {
         mContext = context;
@@ -38,6 +40,12 @@ public class Camera implements android.hardware.Camera.PictureCallback {
         } catch (Exception e) {
             Log.d(TAG, "Cannot instantiate camera");
         }
+    }
+
+    public Camera(Context context, FrameLayout previewHolder) {
+        this(context);
+        mPreviewHolder = previewHolder;
+        mPreviewHolder.addView(mCameraView);
     }
 
     @Override
@@ -80,7 +88,9 @@ public class Camera implements android.hardware.Camera.PictureCallback {
         } else {
             mCameraId = android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK;
         }
+        mPreviewHolder.removeView(mCameraView);
         initCamera();
+        mPreviewHolder.addView(mCameraView);
     }
 
     public CameraView getCameraView() {
