@@ -1,8 +1,13 @@
 package com.camoedo.recorder.activity;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -23,8 +28,28 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private Camera mCamera;
-    private ServiceManager mService;
+    private RecorderService mService;
+    private boolean mBound = false;
+
+    private FrameLayout mPreview;
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to CameraService, cast the IBinder and get CameraService instance
+            RecorderService.ServiceBinder binder = (RecorderService.ServiceBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,32 +64,23 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mCamera = new Camera(this,(FrameLayout) findViewById(R.id.preview));
-
-        mService = new ServiceManager(this, RecorderService.class, new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case RecorderService.MSG_REGISTERED:
-                        break;
-                    case RecorderService.MSG_UNREGISTERED:
-                        break;
-                    default:
-                        super.handleMessage(msg);
-                }
-            }
-        });
+        mPreview = (FrameLayout) findViewById(R.id.preview);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mCamera.switchCamera();
-//                if (mService.isRunning()) {
-//                    mService.stop();
-//                } else {
-//                    mService.start();
-//                }
+                Intent intent = new Intent(MainActivity.this, RecorderService.class);
+                if (isServiceRunning(RecorderService.class)) {
+                    if (mBound) {
+                        unbindService(mConnection);
+                        mBound = false;
+                    }
+                    stopService(intent);
+                } else {
+                    bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+                    startService(intent);
+                }
             }
         });
     }
@@ -73,8 +89,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if (mService.isRunning()) {
-            mService.bind();
+        if (isServiceRunning(RecorderService.class)) {
+            // Bind to CameraService
+            Intent intent = new Intent(this, RecorderService.class);
+            bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
             Log.i(TAG, "Service bound");
         }
     }
@@ -83,15 +101,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mCamera != null) {
-            mCamera.release();
-            mCamera = null;
-        }
-
-        try {
-            mService.unbind();
-        } catch (Throwable t) {
-            Log.e(TAG, "Failed to unbind from the service", t);
+        if (mBound) {
+            unbindService(mConnection);
+            mBound = false;
+            Log.i(TAG, "Service unbound");
         }
     }
 
@@ -119,5 +132,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

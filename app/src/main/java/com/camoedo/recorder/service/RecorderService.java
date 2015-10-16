@@ -2,23 +2,28 @@ package com.camoedo.recorder.service;
 
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Handler;
-import android.os.Message;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.camoedo.recorder.Camera;
-import com.camoedo.recorder.activity.MainActivity;
 import com.camoedo.recorder.R;
+import com.camoedo.recorder.activity.MainActivity;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class RecorderService extends AbstractService {
+public class RecorderService extends Service {
 
     private static final String TAG = "RecorderService";
     private static final int NOTIFICATION_ID = 1;
+
+    private final IBinder mBinder = new ServiceBinder();
 
     private final Handler mHandler = new Handler();
 
@@ -26,7 +31,8 @@ public class RecorderService extends AbstractService {
     private Timer mTimer;
 
     @Override
-    public void onStartService() {
+    public void onCreate() {
+        super.onCreate();
 
         mCamera = new Camera(this);
 
@@ -48,7 +54,14 @@ public class RecorderService extends AbstractService {
     }
 
     @Override
-    public void onStopService() {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "Received start id " + startId + ": " + intent);
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
 
         if (mTimer != null) {
             mTimer.cancel();
@@ -65,9 +78,10 @@ public class RecorderService extends AbstractService {
         Log.i(TAG, "Service Stopped.");
     }
 
+    @Nullable
     @Override
-    public void onReceiveMessage(Message msg) {
-
+    public IBinder onBind(Intent intent) {
+        return mBinder;
     }
 
     private Notification getNotification() {
@@ -95,5 +109,21 @@ public class RecorderService extends AbstractService {
         builder.setContentIntent(pendingIntent);
         builder.setOngoing(true);
         return builder.build();
+    }
+
+
+    public Camera getCamera() {
+        return mCamera;
+    }
+
+    /**
+     * Class used for the client Binder. Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with IPC.
+     */
+    public class ServiceBinder extends Binder {
+        public RecorderService getService() {
+            // Return this instance of CameraService so clients can call public methods
+            return RecorderService.this;
+        }
     }
 }
